@@ -198,8 +198,8 @@ func main() {
 
 		for {
 			os.Stdout.WriteString(DisplayBoard(board) + "\n")
-			input := promptPlayerMove(reader, currentPlayer)
 
+			input := promptPlayerMove(reader, currentPlayer)
 			row, col, err := parseMove(input)
 			if err != nil {
 				clearScreen()
@@ -214,14 +214,12 @@ func main() {
 			}
 
 			board, _ = ApplyMove(board, row, col, currentPlayer)
-
 			if CheckWin(board, currentPlayer) {
 				clearScreen()
 				os.Stdout.WriteString(DisplayBoard(board) + "\n")
 				log.Printf("Player %c wins!\n", currentPlayer)
 				break
 			}
-
 			if CheckDraw(board) {
 				clearScreen()
 				os.Stdout.WriteString(DisplayBoard(board) + "\n")
@@ -233,6 +231,7 @@ func main() {
 		}
 
 		log.Println("Game over! Would you like to play again? (y/n): ")
+
 		restartInput, _ := reader.ReadString('\n')
 		if strings.TrimSpace(strings.ToLower(restartInput)) != "y" {
 			clearScreen()
