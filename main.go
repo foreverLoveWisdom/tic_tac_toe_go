@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -20,27 +18,6 @@ const (
 	ColorDim       = "\033[2m"
 	ColorUnderline = "\033[4m"
 )
-
-func clearScreen() {
-	switch runtime.GOOS {
-	case "linux", "darwin":
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-
-		if err := cmd.Run(); err != nil {
-			log.Printf("Failed to clear screen: %v\n", err)
-		}
-	case "windows":
-		cmd := exec.Command("cmd", "/c", "cls")
-		cmd.Stdout = os.Stdout
-
-		if err := cmd.Run(); err != nil {
-			log.Printf("Failed to clear screen: %v\n", err)
-		}
-	default:
-		log.Printf("Unsupported operating system: %s\n", runtime.GOOS)
-	}
-}
 
 func ColorizeRune(r rune) string {
 	switch r {
@@ -184,7 +161,6 @@ func runGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3
 		board, currentPlayer, valid = playRound(board, currentPlayer, reader)
 
 		if !valid {
-			clearScreen()
 
 			continue
 		}
@@ -204,7 +180,6 @@ func runGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3
 }
 
 func refreshBoard(board [3][3]rune) {
-	clearScreen()
 	os.Stdout.WriteString(DisplayBoard(board) + "\n")
 }
 
@@ -317,7 +292,6 @@ func main() {
 		runGameLoop(board, currentPlayer, reader)
 
 		if !promptRestart(reader) {
-			clearScreen()
 			log.Println("Thank you for playing! Goodbye.")
 
 			break
