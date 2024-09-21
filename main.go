@@ -170,10 +170,9 @@ func promptPlayerMove(reader *bufio.Reader, currentPlayer rune) string {
 }
 
 func parseMove(input string) (int, int, error) {
-	parts := strings.Split(input, " ")
-
 	const expectedParts = 2
 
+	parts := strings.Split(input, " ")
 	if len(parts) != expectedParts {
 		return -1, -1, errors.New("invalid input format")
 	}
