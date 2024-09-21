@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -196,22 +197,28 @@ func runGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3
 			continue
 		}
 
-		if CheckWin(board, switchPlayer(currentPlayer)) {
+		ended, message := checkGameEnd(board, currentPlayer)
+		if ended {
 			refreshBoard(board)
-			log.Printf("Player %c wins!\n", switchPlayer(currentPlayer))
-
-			break
-		}
-
-		if CheckDraw(board) {
-			refreshBoard(board)
-			log.Println("It's a draw!")
+			log.Println(message)
 
 			break
 		}
 	}
 
 	return board, currentPlayer
+}
+
+func checkGameEnd(board [3][3]rune, currentPlayer rune) (bool, string) {
+	if CheckWin(board, currentPlayer) {
+		return true, fmt.Sprintf("Player %c wins!", currentPlayer)
+	}
+
+	if CheckDraw(board) {
+		return true, "It's a draw!"
+	}
+
+	return false, ""
 }
 
 func printWelcomeMessage() {
