@@ -161,7 +161,6 @@ func runGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3
 		board, currentPlayer, valid = playRound(board, currentPlayer, reader)
 
 		if !valid {
-
 			continue
 		}
 
