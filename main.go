@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -19,42 +20,38 @@ const (
 	ColorUnderline = "\033[4m"
 )
 
-var lastRow, lastCol int = -1, -1
-
 func clearScreen() {
 	switch runtime.GOOS {
 	case "linux", "darwin":
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
 		if err := cmd.Run(); err != nil {
-			// handle the error
+			log.Printf("Failed to clear screen: %v\n", err)
 		}
 	case "windows":
 		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
 		if err := cmd.Run(); err != nil {
-			// handle the error
+			log.Printf("Failed to clear screen: %v\n", err)
 		}
 	default:
-		// Unsupported OS; do nothing
+		log.Printf("Unsupported operating system: %s\n", runtime.GOOS)
 	}
 }
 
 func ColorizeRune(r rune, highlight bool) string {
-	colored := ""
-	switch r {
-	case 'X':
-		colored = ColorRed + string(r) + ColorReset
-	case 'O':
-		colored = ColorBlue + string(r) + ColorReset
-	default:
-		colored = " "
+	if highlight {
+		return ColorUnderline + string(r) + ColorReset
 	}
 
-	if highlight && r != ' ' {
-		return ColorBold + colored + ColorReset
+	switch r {
+	case 'X':
+		return ColorBold + ColorRed + string(r) + ColorReset
+	case 'O':
+		return ColorBold + ColorBlue + string(r) + ColorReset
+	default:
+		return " "
 	}
-	return colored
 }
 
 func InitializeBoard() [3][3]rune {
@@ -69,14 +66,12 @@ func InitializeBoard() [3][3]rune {
 	return board
 }
 
-func DisplayBoard(board [3][3]rune) string {
+func DisplayBoard(board [3][3]rune, lastRow int, lastCol int) string {
 	var sb strings.Builder
 
-	// Column headers
 	sb.WriteString("   1   2   3\n")
 
 	for row := range [3]struct{}{} {
-		// Row number
 		sb.WriteString(strconv.Itoa(row+1) + "  ")
 		for col := range [3]struct{}{} {
 			highlight := (row == lastRow && col == lastCol)
@@ -159,11 +154,12 @@ func CheckDraw(board [3][3]rune) bool {
 func main() {
 	board := InitializeBoard()
 	currentPlayer := 'X'
+	lastRow, lastCol := -1, -1
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
 		clearScreen()
-		os.Stdout.WriteString(DisplayBoard(board) + "\n")
+		os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
 		os.Stdout.WriteString("Player " + string(currentPlayer) + ", enter your move (row and column: 1 1): ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
@@ -201,16 +197,19 @@ func main() {
 			continue
 		}
 
+		lastRow = row
+		lastCol = col
+
 		if CheckWin(board, currentPlayer) {
 			clearScreen()
-			os.Stdout.WriteString(DisplayBoard(board) + "\n")
+			os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
 			os.Stdout.WriteString("Player " + string(currentPlayer) + " wins!\n")
 			break
 		}
 
 		if CheckDraw(board) {
 			clearScreen()
-			os.Stdout.WriteString(DisplayBoard(board) + "\n")
+			os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
 			os.Stdout.WriteString("It's a draw!\n")
 			break
 		}
