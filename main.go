@@ -39,11 +39,7 @@ func clearScreen() {
 	}
 }
 
-func ColorizeRune(r rune, highlight bool) string {
-	if highlight {
-		return ColorUnderline + string(r) + ColorReset
-	}
-
+func ColorizeRune(r rune) string {
 	switch r {
 	case 'X':
 		return ColorBold + ColorRed + string(r) + ColorReset
@@ -74,8 +70,7 @@ func DisplayBoard(board [3][3]rune, lastRow int, lastCol int) string {
 	for row := range [3]struct{}{} {
 		sb.WriteString(strconv.Itoa(row+1) + "  ")
 		for col := range [3]struct{}{} {
-			highlight := (row == lastRow && col == lastCol)
-			sb.WriteString(ColorizeRune(board[row][col], highlight))
+			sb.WriteString(ColorizeRune(board[row][col]))
 			const maxCol = 2
 
 			if col < maxCol {
@@ -239,10 +234,10 @@ func main() {
 			currentPlayer = switchPlayer(currentPlayer)
 		}
 
-		clearScreen()
 		log.Println("Game over! Would you like to play again? (y/n): ")
 		restartInput, _ := reader.ReadString('\n')
 		if strings.TrimSpace(strings.ToLower(restartInput)) != "y" {
+			clearScreen()
 			log.Println("Thank you for playing! Goodbye.")
 			break
 		}
