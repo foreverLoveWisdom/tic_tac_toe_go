@@ -173,11 +173,45 @@ func CheckDraw(board [3][3]rune) bool {
 	return true
 }
 
+func initializeGame() ([3][3]rune, rune, *bufio.Reader) {
+	board := InitializeBoard()
+	player := 'X'
+	reader := bufio.NewReader(os.Stdin)
+
+	printWelcomeMessage()
+
+	return board, player, reader
+}
+
 func printWelcomeMessage() {
 	log.Println("Welcome to Tic-Tac-Toe!")
 	log.Println("Players take turns to place their mark (X or O) on the board.")
 	log.Println("Enter your move as 'row column' (e.g., '1 1' for top-left corner).")
 	log.Println("Rows and columns are numbered from 1 to 3.")
+}
+
+func refreshBoard(board [3][3]rune) {
+	clearScreen()
+	os.Stdout.WriteString(DisplayBoard(board) + "\n")
+}
+
+func playRound(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]rune, rune, bool) {
+	input := promptPlayerMove(reader, currentPlayer)
+	row, col, err := parseMove(input)
+
+	if err != nil {
+		log.Println(err)
+		return board, currentPlayer, false
+	}
+
+	if !IsValidMove(board, row, col) {
+		log.Println("Invalid move. Try again.")
+		return board, currentPlayer, false
+	}
+
+	newBoard, _ := ApplyMove(board, row, col, currentPlayer)
+
+	return newBoard, switchPlayer(currentPlayer), true
 }
 
 func promptPlayerMove(reader *bufio.Reader, currentPlayer rune) string {
@@ -211,11 +245,6 @@ func parseMove(input string) (int, int, error) {
 	return row - 1, col - 1, nil
 }
 
-func refreshBoard(board [3][3]rune) {
-	clearScreen()
-	os.Stdout.WriteString(DisplayBoard(board) + "\n")
-}
-
 func switchPlayer(currentPlayer rune) rune {
 	if currentPlayer == 'X' {
 		return 'O'
@@ -224,34 +253,11 @@ func switchPlayer(currentPlayer rune) rune {
 	return 'X'
 }
 
-func playRound(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]rune, rune, bool) {
-	input := promptPlayerMove(reader, currentPlayer)
-	row, col, err := parseMove(input)
-
-	if err != nil {
-		log.Println(err)
-		return board, currentPlayer, false
-	}
-
-	if !IsValidMove(board, row, col) {
-		log.Println("Invalid move. Try again.")
-		return board, currentPlayer, false
-	}
-
-	newBoard, _ := ApplyMove(board, row, col, currentPlayer)
-
-	return newBoard, switchPlayer(currentPlayer), true
-}
-
 func main() {
 	for {
 		var valid bool
 
-		board := InitializeBoard()
-		currentPlayer := 'X'
-		reader := bufio.NewReader(os.Stdin)
-
-		printWelcomeMessage()
+		board, currentPlayer, reader := initializeGame()
 
 		for {
 			refreshBoard(board)
