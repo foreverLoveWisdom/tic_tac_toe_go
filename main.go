@@ -204,7 +204,7 @@ func runGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3
 }
 
 func refreshBoard(board [3][3]rune) {
-	// clearScreen()
+	clearScreen()
 	os.Stdout.WriteString(DisplayBoard(board) + "\n")
 }
 
