@@ -103,21 +103,6 @@ func IsValidMove(board [3][3]rune, currentRow int, currentCol int) bool {
 	return board[currentRow][currentCol] == ' '
 }
 
-func ApplyMove(board [3][3]rune, currentRow int, currentCol int, player rune) ([3][3]rune, error) {
-	if player != 'X' && player != 'O' {
-		return board, errors.New("invalid player")
-	}
-
-	if !IsValidMove(board, currentRow, currentCol) {
-		return board, errors.New("invalid move")
-	}
-
-	newBoard := board
-	newBoard[currentRow][currentCol] = player
-
-	return newBoard, nil
-}
-
 func CheckWin(board [3][3]rune, player rune) bool {
 	return checkRows(board, player) || checkColumns(board, player) || checkDiagonals(board, player)
 }
@@ -184,6 +169,13 @@ func initializeGame() ([3][3]rune, rune, *bufio.Reader) {
 	return board, player, reader
 }
 
+func printWelcomeMessage() {
+	log.Println("Welcome to Tic-Tac-Toe!")
+	log.Println("Players take turns to place their mark (X or O) on the board.")
+	log.Println("Enter your move as 'row column' (e.g., '1 1' for top-left corner).")
+	log.Println("Rows and columns are numbered from 1 to 3.")
+}
+
 func runGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]rune, rune) {
 	var valid bool
 
@@ -204,9 +196,16 @@ func runGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3
 
 			break
 		}
+
+		currentPlayer = switchPlayer(currentPlayer)
 	}
 
 	return board, currentPlayer
+}
+
+func refreshBoard(board [3][3]rune) {
+	// clearScreen()
+	os.Stdout.WriteString(DisplayBoard(board) + "\n")
 }
 
 func checkGameEnd(board [3][3]rune, currentPlayer rune) (bool, string) {
@@ -219,18 +218,6 @@ func checkGameEnd(board [3][3]rune, currentPlayer rune) (bool, string) {
 	}
 
 	return false, ""
-}
-
-func printWelcomeMessage() {
-	log.Println("Welcome to Tic-Tac-Toe!")
-	log.Println("Players take turns to place their mark (X or O) on the board.")
-	log.Println("Enter your move as 'row column' (e.g., '1 1' for top-left corner).")
-	log.Println("Rows and columns are numbered from 1 to 3.")
-}
-
-func refreshBoard(board [3][3]rune) {
-	clearScreen()
-	os.Stdout.WriteString(DisplayBoard(board) + "\n")
 }
 
 func playRound(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]rune, rune, bool) {
@@ -246,20 +233,12 @@ func playRound(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][
 		return board, currentPlayer, false
 	}
 
-	return board, switchPlayer(currentPlayer), true
+	return board, currentPlayer, true
 }
 
 func getPlayerMove(reader *bufio.Reader, currentPlayer rune) (int, int, error) {
 	input := promptPlayerMove(reader, currentPlayer)
 	return parseMove(input)
-}
-
-func executeMove(board [3][3]rune, row, col int, currentPlayer rune) ([3][3]rune, error) {
-	if !IsValidMove(board, row, col) {
-		return board, errors.New("invalid move")
-	}
-
-	return ApplyMove(board, row, col, currentPlayer)
 }
 
 func promptPlayerMove(reader *bufio.Reader, currentPlayer rune) string {
@@ -291,6 +270,29 @@ func parseMove(input string) (int, int, error) {
 	}
 
 	return row - 1, col - 1, nil
+}
+
+func executeMove(board [3][3]rune, row, col int, currentPlayer rune) ([3][3]rune, error) {
+	if !IsValidMove(board, row, col) {
+		return board, errors.New("invalid move")
+	}
+
+	return ApplyMove(board, row, col, currentPlayer)
+}
+
+func ApplyMove(board [3][3]rune, currentRow int, currentCol int, player rune) ([3][3]rune, error) {
+	if player != 'X' && player != 'O' {
+		return board, errors.New("invalid player")
+	}
+
+	if !IsValidMove(board, currentRow, currentCol) {
+		return board, errors.New("invalid move")
+	}
+
+	newBoard := board
+	newBoard[currentRow][currentCol] = player
+
+	return newBoard, nil
 }
 
 func switchPlayer(currentPlayer rune) rune {
