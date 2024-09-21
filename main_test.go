@@ -168,16 +168,6 @@ func TestCheckWin(t *testing.T) {
 			expected: true,
 		},
 		{
-			name: "Draw game",
-			board: [3][3]rune{
-				{'X', 'O', 'X'},
-				{'O', 'X', 'O'},
-				{'O', 'X', 'O'},
-			},
-			player:   'X',
-			expected: false,
-		},
-		{
 			name: "Incomplete row win",
 			board: [3][3]rune{
 				{'X', 'X', ' '},
@@ -216,5 +206,31 @@ func TestCheckWin(t *testing.T) {
 				t.Errorf("CheckWin() = %v; want %v", got, tt.expected)
 			}
 		})
+	}
+}
+
+func TestCheckDraw(t *testing.T) {
+	var board [3][3]rune
+	board = [3][3]rune{
+		{'X', 'O', 'X'},
+		{'X', 'O', 'O'},
+		{'O', 'X', 'X'},
+	}
+	if !CheckDraw(board) {
+		t.Errorf("Expected the game to be a draw")
+	}
+
+	board = InitializeBoard()
+	if CheckDraw(board) {
+		t.Errorf("Expected the game not to be a draw when the board is empty")
+	}
+
+	board = [3][3]rune{
+		{'X', 'O', 'X'},
+		{'X', 'O', 'O'},
+		{'O', 'X', ' '},
+	}
+	if CheckDraw(board) {
+		t.Errorf("Expected the game not to be a draw when there are empty cells")
 	}
 }
