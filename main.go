@@ -25,12 +25,14 @@ func clearScreen() {
 	case "linux", "darwin":
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
+
 		if err := cmd.Run(); err != nil {
 			log.Printf("Failed to clear screen: %v\n", err)
 		}
 	case "windows":
 		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
+
 		if err := cmd.Run(); err != nil {
 			log.Printf("Failed to clear screen: %v\n", err)
 		}
@@ -63,22 +65,26 @@ func InitializeBoard() [3][3]rune {
 }
 
 func DisplayBoard(board [3][3]rune) string {
+	const maxCol = 2
+
+	const maxRow = 2
+
 	var sb strings.Builder
 
 	sb.WriteString("   1   2   3\n")
 
 	for row := range [3]struct{}{} {
 		sb.WriteString(strconv.Itoa(row+1) + "  ")
+
 		for col := range [3]struct{}{} {
 			sb.WriteString(ColorizeRune(board[row][col]))
-			const maxCol = 2
 
 			if col < maxCol {
 				sb.WriteString(" | ")
 			}
 		}
+
 		sb.WriteString("\n")
-		const maxRow = 2
 
 		if row < maxRow {
 			sb.WriteString("  ---+---+---\n")
@@ -127,6 +133,7 @@ func CheckWin(board [3][3]rune, player rune) bool {
 	if board[0][0] == player && board[1][1] == player && board[2][2] == player {
 		return true
 	}
+
 	if board[0][2] == player && board[1][1] == player && board[2][0] == player {
 		return true
 	}
@@ -156,12 +163,15 @@ func printWelcomeMessage() {
 func promptPlayerMove(reader *bufio.Reader, currentPlayer rune) string {
 	message := "Player %c, it's your turn! Please enter your move as guided above: "
 	log.Printf(message, currentPlayer)
+
 	input, _ := reader.ReadString('\n')
+
 	return strings.TrimSpace(input)
 }
 
 func parseMove(input string) (int, int, error) {
 	parts := strings.Split(input, " ")
+
 	const expectedParts = 2
 
 	if len(parts) != expectedParts {
@@ -170,9 +180,11 @@ func parseMove(input string) (int, int, error) {
 
 	row, err1 := strconv.Atoi(parts[0])
 	col, err2 := strconv.Atoi(parts[1])
+
 	if err1 != nil {
 		return -1, -1, errors.New("invalid row number")
 	}
+
 	if err2 != nil {
 		return -1, -1, errors.New("invalid column number")
 	}
@@ -201,15 +213,18 @@ func main() {
 
 			input := promptPlayerMove(reader, currentPlayer)
 			row, col, err := parseMove(input)
+
 			if err != nil {
 				clearScreen()
 				log.Println(err)
+
 				continue
 			}
 
 			if !IsValidMove(board, row, col) {
 				clearScreen()
 				log.Println("Invalid move. Cell is either occupied or out of range.")
+
 				continue
 			}
 
@@ -218,12 +233,15 @@ func main() {
 				clearScreen()
 				os.Stdout.WriteString(DisplayBoard(board) + "\n")
 				log.Printf("Player %c wins!\n", currentPlayer)
+
 				break
 			}
+
 			if CheckDraw(board) {
 				clearScreen()
 				os.Stdout.WriteString(DisplayBoard(board) + "\n")
 				log.Println("It's a draw!")
+
 				break
 			}
 
@@ -236,6 +254,7 @@ func main() {
 		if strings.TrimSpace(strings.ToLower(restartInput)) != "y" {
 			clearScreen()
 			log.Println("Thank you for playing! Goodbye.")
+
 			break
 		}
 	}
