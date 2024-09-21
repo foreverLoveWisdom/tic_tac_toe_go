@@ -45,7 +45,7 @@ func TestIsValidMove(t *testing.T) {
 		{"Out-of-bounds both", 3, 3, false},
 		{"Edge case: last row, first column", 2, 0, true},
 		{"Edge case: first row, last column", 0, 2, true},
-		{"Center cell (occupied by 'O')", 1, 1, false},
+		{"Empty cell (occupied by 'O')", 1, 1, false},
 		{"Valid corner", 2, 2, true},
 	}
 
@@ -58,7 +58,6 @@ func TestIsValidMove(t *testing.T) {
 		})
 	}
 
-	// Test full board scenario
 	fullBoard := [3][3]rune{
 		{'X', 'O', 'X'},
 		{'O', 'X', 'O'},
