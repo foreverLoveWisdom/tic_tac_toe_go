@@ -151,73 +151,100 @@ func CheckDraw(board [3][3]rune) bool {
 	return true
 }
 
+func printWelcomeMessage() {
+	log.Println("Welcome to Tic-Tac-Toe!")
+	log.Println("Players take turns to place their mark (X or O) on the board.")
+	log.Println("Enter your move as 'row column' (e.g., '1 1' for top-left corner).")
+	log.Println("Rows and columns are numbered from 1 to 3.")
+}
+
+func promptPlayerMove(reader *bufio.Reader, currentPlayer rune) string {
+	message := "Player %c, it's your turn! Please enter your move as guided above: "
+	log.Printf(message, currentPlayer)
+	input, _ := reader.ReadString('\n')
+	return strings.TrimSpace(input)
+}
+
+func parseMove(input string) (int, int, error) {
+	parts := strings.Split(input, " ")
+	const expectedParts = 2
+
+	if len(parts) != expectedParts {
+		return -1, -1, errors.New("invalid input format")
+	}
+
+	row, err1 := strconv.Atoi(parts[0])
+	col, err2 := strconv.Atoi(parts[1])
+	if err1 != nil {
+		return -1, -1, errors.New("invalid row number")
+	}
+	if err2 != nil {
+		return -1, -1, errors.New("invalid column number")
+	}
+
+	return row - 1, col - 1, nil
+}
+
+func switchPlayer(currentPlayer rune) rune {
+	if currentPlayer == 'X' {
+		return 'O'
+	}
+
+	return 'X'
+}
+
 func main() {
-	board := InitializeBoard()
-	currentPlayer := 'X'
-	lastRow, lastCol := -1, -1
-	reader := bufio.NewReader(os.Stdin)
-
 	for {
+		board := InitializeBoard()
+		lastRow, lastCol := -1, -1
+		currentPlayer := 'X'
+		reader := bufio.NewReader(os.Stdin)
+
+		printWelcomeMessage()
+
+		for {
+			os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
+			input := promptPlayerMove(reader, currentPlayer)
+
+			row, col, err := parseMove(input)
+			if err != nil {
+				clearScreen()
+				log.Println(err)
+				continue
+			}
+
+			if !IsValidMove(board, row, col) {
+				clearScreen()
+				log.Println("Invalid move. Cell is either occupied or out of range.")
+				continue
+			}
+
+			board, _ = ApplyMove(board, row, col, currentPlayer)
+			lastRow, lastCol = row, col
+
+			if CheckWin(board, currentPlayer) {
+				clearScreen()
+				os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
+				log.Printf("Player %c wins!\n", currentPlayer)
+				break
+			}
+
+			if CheckDraw(board) {
+				clearScreen()
+				os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
+				log.Println("It's a draw!")
+				break
+			}
+
+			currentPlayer = switchPlayer(currentPlayer)
+		}
+
 		clearScreen()
-		os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
-		os.Stdout.WriteString("Player " + string(currentPlayer) + ", enter your move (row and column: 1 1): ")
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			os.Stdout.WriteString("Error reading input, please try again.\n")
-			continue
-		}
-
-		input = strings.TrimSpace(input)
-		parts := strings.Split(input, " ")
-		const expectedParts = 2
-
-		if len(parts) != expectedParts {
-			os.Stdout.WriteString("Invalid input format. Please enter two numbers separated by a space.\n")
-			continue
-		}
-
-		row, err1 := strconv.Atoi(parts[0])
-		col, err2 := strconv.Atoi(parts[1])
-		if err1 != nil || err2 != nil {
-			os.Stdout.WriteString("Invalid numbers. Please enter integers between 1 and 3.\n")
-			continue
-		}
-
-		row--
-		col--
-
-		if !IsValidMove(board, row, col) {
-			os.Stdout.WriteString("Invalid move. Cell is either occupied or out of range.\n")
-			continue
-		}
-
-		board, err = ApplyMove(board, row, col, currentPlayer)
-		if err != nil {
-			os.Stdout.WriteString("Error applying move. Please try again.\n")
-			continue
-		}
-
-		lastRow = row
-		lastCol = col
-
-		if CheckWin(board, currentPlayer) {
-			clearScreen()
-			os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
-			os.Stdout.WriteString("Player " + string(currentPlayer) + " wins!\n")
+		log.Println("Game over! Would you like to play again? (y/n): ")
+		restartInput, _ := reader.ReadString('\n')
+		if strings.TrimSpace(strings.ToLower(restartInput)) != "y" {
+			log.Println("Thank you for playing! Goodbye.")
 			break
-		}
-
-		if CheckDraw(board) {
-			clearScreen()
-			os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
-			os.Stdout.WriteString("It's a draw!\n")
-			break
-		}
-
-		if currentPlayer == 'X' {
-			currentPlayer = 'O'
-		} else {
-			currentPlayer = 'X'
 		}
 	}
 }
