@@ -224,8 +224,29 @@ func switchPlayer(currentPlayer rune) rune {
 	return 'X'
 }
 
+func playRound(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]rune, rune, bool) {
+	input := promptPlayerMove(reader, currentPlayer)
+	row, col, err := parseMove(input)
+
+	if err != nil {
+		log.Println(err)
+		return board, currentPlayer, false
+	}
+
+	if !IsValidMove(board, row, col) {
+		log.Println("Invalid move. Try again.")
+		return board, currentPlayer, false
+	}
+
+	newBoard, _ := ApplyMove(board, row, col, currentPlayer)
+
+	return newBoard, switchPlayer(currentPlayer), true
+}
+
 func main() {
 	for {
+		var valid bool
+
 		board := InitializeBoard()
 		currentPlayer := 'X'
 		reader := bufio.NewReader(os.Stdin)
@@ -233,29 +254,17 @@ func main() {
 		printWelcomeMessage()
 
 		for {
-			os.Stdout.WriteString(DisplayBoard(board) + "\n")
+			refreshBoard(board)
 
-			input := promptPlayerMove(reader, currentPlayer)
-			row, col, err := parseMove(input)
-
-			if err != nil {
+			board, currentPlayer, valid = playRound(board, currentPlayer, reader)
+			if !valid {
 				clearScreen()
-				log.Println(err)
-
 				continue
 			}
 
-			if !IsValidMove(board, row, col) {
-				clearScreen()
-				log.Println("Invalid move. Cell is either occupied or out of range.")
-
-				continue
-			}
-
-			board, _ = ApplyMove(board, row, col, currentPlayer)
-			if CheckWin(board, currentPlayer) {
+			if CheckWin(board, switchPlayer(currentPlayer)) {
 				refreshBoard(board)
-				log.Printf("Player %c wins!\n", currentPlayer)
+				log.Printf("Player %c wins!\n", switchPlayer(currentPlayer))
 
 				break
 			}
@@ -266,13 +275,12 @@ func main() {
 
 				break
 			}
-
-			currentPlayer = switchPlayer(currentPlayer)
 		}
 
 		log.Println("Game over! Would you like to play again? (y/n): ")
 
 		restartInput, _ := reader.ReadString('\n')
+
 		if strings.TrimSpace(strings.ToLower(restartInput)) != "y" {
 			clearScreen()
 			log.Println("Thank you for playing! Goodbye.")
