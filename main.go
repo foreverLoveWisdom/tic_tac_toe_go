@@ -26,11 +26,15 @@ func clearScreen() {
 	case "linux", "darwin":
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
-		cmd.Run()
+		if err := cmd.Run(); err != nil {
+			// handle the error
+		}
 	case "windows":
 		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
-		cmd.Run()
+		if err := cmd.Run(); err != nil {
+			// handle the error
+		}
 	default:
 		// Unsupported OS; do nothing
 	}
@@ -71,18 +75,22 @@ func DisplayBoard(board [3][3]rune) string {
 	// Column headers
 	sb.WriteString("   1   2   3\n")
 
-	for row := 0; row < 3; row++ {
+	for row := range [3]struct{}{} {
 		// Row number
 		sb.WriteString(strconv.Itoa(row+1) + "  ")
-		for col := 0; col < 3; col++ {
+		for col := range [3]struct{}{} {
 			highlight := (row == lastRow && col == lastCol)
 			sb.WriteString(ColorizeRune(board[row][col], highlight))
-			if col < 2 {
+			const maxCol = 2
+
+			if col < maxCol {
 				sb.WriteString(" | ")
 			}
 		}
 		sb.WriteString("\n")
-		if row < 2 {
+		const maxRow = 2
+
+		if row < maxRow {
 			sb.WriteString("  ---+---+---\n")
 		}
 	}
