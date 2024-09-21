@@ -22,16 +22,8 @@ func TestDisplayBoard(t *testing.T) {
 	board[0][0] = 'X'
 	board[1][1] = 'O'
 
-	originalLastRow := lastRow
-	originalLastCol := lastCol
-
-	lastRow = 1
-	lastCol = 1
-
-	defer func() {
-		lastRow = originalLastRow
-		lastCol = originalLastCol
-	}()
+	lastRow := 1
+	lastCol := 1
 
 	expectedOutput := "   1   2   3\n" +
 		"1  " + ColorRed + "X" + ColorReset + " |   |  \n" +
@@ -40,9 +32,10 @@ func TestDisplayBoard(t *testing.T) {
 		"  ---+---+---\n" +
 		"3    |   |  \n"
 
-	got := DisplayBoard(board)
+	got := DisplayBoard(board, lastRow, lastCol)
 	cleanGot := stripANSI(got)
 	cleanExpected := stripANSI(expectedOutput)
+
 	if cleanGot != cleanExpected {
 		t.Errorf("DisplayBoard() =\n%q\nExpected:\n%q", got, expectedOutput)
 	}
@@ -76,7 +69,7 @@ func verifyUnchangedCells(t *testing.T, oldBoard [3][3]rune, newBoard [3][3]rune
 
 func TestIsValidMove(t *testing.T) {
 	board := InitializeBoard()
-	board[1][1] = 'O' // Occupied cell for testing
+	board[1][1] = 'O'
 
 	tests := []struct {
 		name     string
