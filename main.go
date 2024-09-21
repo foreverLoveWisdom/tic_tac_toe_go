@@ -118,27 +118,47 @@ func ApplyMove(board [3][3]rune, currentRow int, currentCol int, player rune) ([
 }
 
 func CheckWin(board [3][3]rune, player rune) bool {
+	return checkRows(board, player) || checkColumns(board, player) || checkDiagonals(board, player)
+}
+
+func checkRows(board [3][3]rune, player rune) bool {
 	for row := range [3]struct{}{} {
-		if board[row][0] == player && board[row][1] == player && board[row][2] == player {
+		if isRowWin(board, player, row) {
 			return true
 		}
-	}
-
-	for col := range [3]struct{}{} {
-		if board[0][col] == player && board[1][col] == player && board[2][col] == player {
-			return true
-		}
-	}
-
-	if board[0][0] == player && board[1][1] == player && board[2][2] == player {
-		return true
-	}
-
-	if board[0][2] == player && board[1][1] == player && board[2][0] == player {
-		return true
 	}
 
 	return false
+}
+
+func isRowWin(board [3][3]rune, player rune, row int) bool {
+	return board[row][0] == player && board[row][1] == player && board[row][2] == player
+}
+
+func checkColumns(board [3][3]rune, player rune) bool {
+	for col := range [3]struct{}{} {
+		if isColumnWin(board, player, col) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isColumnWin(board [3][3]rune, player rune, col int) bool {
+	return board[0][col] == player && board[1][col] == player && board[2][col] == player
+}
+
+func checkDiagonals(board [3][3]rune, player rune) bool {
+	return isMainDiagonalWin(board, player) || isAntiDiagonalWin(board, player)
+}
+
+func isMainDiagonalWin(board [3][3]rune, player rune) bool {
+	return board[0][0] == player && board[1][1] == player && board[2][2] == player
+}
+
+func isAntiDiagonalWin(board [3][3]rune, player rune) bool {
+	return board[0][2] == player && board[1][1] == player && board[2][0] == player
 }
 
 func CheckDraw(board [3][3]rune) bool {
