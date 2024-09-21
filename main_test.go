@@ -17,13 +17,16 @@ func TestInitialBoard(t *testing.T) {
 	}
 }
 
+var ansi = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+func stripANSI(str string) string {
+	return ansi.ReplaceAllString(str, "")
+}
+
 func TestDisplayBoard(t *testing.T) {
 	board := InitializeBoard()
 	board[0][0] = 'X'
 	board[1][1] = 'O'
-
-	lastRow := 1
-	lastCol := 1
 
 	expectedOutput := "   1   2   3\n" +
 		"1  " + ColorRed + "X" + ColorReset + " |   |  \n" +
@@ -32,19 +35,13 @@ func TestDisplayBoard(t *testing.T) {
 		"  ---+---+---\n" +
 		"3    |   |  \n"
 
-	got := DisplayBoard(board, lastRow, lastCol)
+	got := DisplayBoard(board)
 	cleanGot := stripANSI(got)
 	cleanExpected := stripANSI(expectedOutput)
 
 	if cleanGot != cleanExpected {
 		t.Errorf("DisplayBoard() =\n%q\nExpected:\n%q", got, expectedOutput)
 	}
-}
-
-var ansi = regexp.MustCompile(`\x1b\[[0-9;]*m`)
-
-func stripANSI(str string) string {
-	return ansi.ReplaceAllString(str, "")
 }
 
 func isTargetCell(i, j, row, col int) bool {

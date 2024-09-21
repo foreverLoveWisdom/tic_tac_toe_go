@@ -62,7 +62,7 @@ func InitializeBoard() [3][3]rune {
 	return board
 }
 
-func DisplayBoard(board [3][3]rune, lastRow int, lastCol int) string {
+func DisplayBoard(board [3][3]rune) string {
 	var sb strings.Builder
 
 	sb.WriteString("   1   2   3\n")
@@ -191,14 +191,13 @@ func switchPlayer(currentPlayer rune) rune {
 func main() {
 	for {
 		board := InitializeBoard()
-		lastRow, lastCol := -1, -1
 		currentPlayer := 'X'
 		reader := bufio.NewReader(os.Stdin)
 
 		printWelcomeMessage()
 
 		for {
-			os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
+			os.Stdout.WriteString(DisplayBoard(board) + "\n")
 			input := promptPlayerMove(reader, currentPlayer)
 
 			row, col, err := parseMove(input)
@@ -215,18 +214,17 @@ func main() {
 			}
 
 			board, _ = ApplyMove(board, row, col, currentPlayer)
-			lastRow, lastCol = row, col
 
 			if CheckWin(board, currentPlayer) {
 				clearScreen()
-				os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
+				os.Stdout.WriteString(DisplayBoard(board) + "\n")
 				log.Printf("Player %c wins!\n", currentPlayer)
 				break
 			}
 
 			if CheckDraw(board) {
 				clearScreen()
-				os.Stdout.WriteString(DisplayBoard(board, lastRow, lastCol) + "\n")
+				os.Stdout.WriteString(DisplayBoard(board) + "\n")
 				log.Println("It's a draw!")
 				break
 			}
