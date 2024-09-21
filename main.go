@@ -88,6 +88,18 @@ func CheckWin(board [3][3]rune, player rune) bool {
 	return false
 }
 
+func CheckDraw(board [3][3]rune) bool {
+	for row := range [3]struct{}{} {
+		for col := range [3]struct{}{} {
+			if board[row][col] == ' ' {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
 func main() {
 	board := InitializeBoard()
 	DisplayBoard(board)
