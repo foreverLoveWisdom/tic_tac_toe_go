@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"testing"
 )
 
@@ -20,12 +21,37 @@ func TestDisplayBoard(t *testing.T) {
 	board := InitializeBoard()
 	board[0][0] = 'X'
 	board[1][1] = 'O'
-	expectedOutput := " X |   |  \n---+---+---\n   | O |  \n---+---+---\n   |   |  \n"
+
+	originalLastRow := lastRow
+	originalLastCol := lastCol
+
+	lastRow = 1
+	lastCol = 1
+
+	defer func() {
+		lastRow = originalLastRow
+		lastCol = originalLastCol
+	}()
+
+	expectedOutput := "   1   2   3\n" +
+		"1  " + ColorRed + "X" + ColorReset + " |   |  \n" +
+		"  ---+---+---\n" +
+		"2    | " + ColorBold + ColorBlue + "O" + ColorReset + " |  \n" +
+		"  ---+---+---\n" +
+		"3    |   |  \n"
 
 	got := DisplayBoard(board)
-	if got != expectedOutput {
-		t.Errorf("DisplayBoard() =\n%s\nExpected:\n%s", got, expectedOutput)
+	cleanGot := stripANSI(got)
+	cleanExpected := stripANSI(expectedOutput)
+	if cleanGot != cleanExpected {
+		t.Errorf("DisplayBoard() =\n%q\nExpected:\n%q", got, expectedOutput)
 	}
+}
+
+var ansi = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+func stripANSI(str string) string {
+	return ansi.ReplaceAllString(str, "")
 }
 
 func isTargetCell(i, j, row, col int) bool {
