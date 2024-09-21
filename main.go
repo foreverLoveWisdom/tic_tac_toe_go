@@ -1,9 +1,57 @@
 package main
 
 import (
+	"bufio"
 	"errors"
+	"os"
+	"os/exec"
+	"runtime"
+	"strconv"
 	"strings"
 )
+
+const (
+	ColorReset     = "\033[0m"
+	ColorRed       = "\033[31m"
+	ColorBlue      = "\033[34m"
+	ColorBold      = "\033[1m"
+	ColorDim       = "\033[2m"
+	ColorUnderline = "\033[4m"
+)
+
+var lastRow, lastCol int = -1, -1
+
+func clearScreen() {
+	switch runtime.GOOS {
+	case "linux", "darwin":
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	case "windows":
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	default:
+		// Unsupported OS; do nothing
+	}
+}
+
+func ColorizeRune(r rune, highlight bool) string {
+	colored := ""
+	switch r {
+	case 'X':
+		colored = ColorRed + string(r) + ColorReset
+	case 'O':
+		colored = ColorBlue + string(r) + ColorReset
+	default:
+		colored = " "
+	}
+
+	if highlight && r != ' ' {
+		return ColorBold + colored + ColorReset
+	}
+	return colored
+}
 
 func InitializeBoard() [3][3]rune {
 	var board [3][3]rune
@@ -20,22 +68,22 @@ func InitializeBoard() [3][3]rune {
 func DisplayBoard(board [3][3]rune) string {
 	var sb strings.Builder
 
-	for row := range [3]struct{}{} {
-		for col := range [3]struct{}{} {
-			sb.WriteRune(' ')
-			sb.WriteRune(board[row][col])
-			const maxCol = 2
+	// Column headers
+	sb.WriteString("   1   2   3\n")
 
-			if col < maxCol {
-				sb.WriteString(" |")
+	for row := 0; row < 3; row++ {
+		// Row number
+		sb.WriteString(strconv.Itoa(row+1) + "  ")
+		for col := 0; col < 3; col++ {
+			highlight := (row == lastRow && col == lastCol)
+			sb.WriteString(ColorizeRune(board[row][col], highlight))
+			if col < 2 {
+				sb.WriteString(" | ")
 			}
 		}
-
 		sb.WriteString("\n")
-		const maxRow = 2
-
-		if row < maxRow {
-			sb.WriteString("---+---+---\n")
+		if row < 2 {
+			sb.WriteString("  ---+---+---\n")
 		}
 	}
 
@@ -102,5 +150,67 @@ func CheckDraw(board [3][3]rune) bool {
 
 func main() {
 	board := InitializeBoard()
-	DisplayBoard(board)
+	currentPlayer := 'X'
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		clearScreen()
+		os.Stdout.WriteString(DisplayBoard(board) + "\n")
+		os.Stdout.WriteString("Player " + string(currentPlayer) + ", enter your move (row and column: 1 1): ")
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			os.Stdout.WriteString("Error reading input, please try again.\n")
+			continue
+		}
+
+		input = strings.TrimSpace(input)
+		parts := strings.Split(input, " ")
+		const expectedParts = 2
+
+		if len(parts) != expectedParts {
+			os.Stdout.WriteString("Invalid input format. Please enter two numbers separated by a space.\n")
+			continue
+		}
+
+		row, err1 := strconv.Atoi(parts[0])
+		col, err2 := strconv.Atoi(parts[1])
+		if err1 != nil || err2 != nil {
+			os.Stdout.WriteString("Invalid numbers. Please enter integers between 1 and 3.\n")
+			continue
+		}
+
+		row--
+		col--
+
+		if !IsValidMove(board, row, col) {
+			os.Stdout.WriteString("Invalid move. Cell is either occupied or out of range.\n")
+			continue
+		}
+
+		board, err = ApplyMove(board, row, col, currentPlayer)
+		if err != nil {
+			os.Stdout.WriteString("Error applying move. Please try again.\n")
+			continue
+		}
+
+		if CheckWin(board, currentPlayer) {
+			clearScreen()
+			os.Stdout.WriteString(DisplayBoard(board) + "\n")
+			os.Stdout.WriteString("Player " + string(currentPlayer) + " wins!\n")
+			break
+		}
+
+		if CheckDraw(board) {
+			clearScreen()
+			os.Stdout.WriteString(DisplayBoard(board) + "\n")
+			os.Stdout.WriteString("It's a draw!\n")
+			break
+		}
+
+		if currentPlayer == 'X' {
+			currentPlayer = 'O'
+		} else {
+			currentPlayer = 'X'
+		}
+	}
 }
