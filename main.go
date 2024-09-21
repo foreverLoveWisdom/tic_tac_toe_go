@@ -211,6 +211,11 @@ func parseMove(input string) (int, int, error) {
 	return row - 1, col - 1, nil
 }
 
+func refreshBoard(board [3][3]rune) {
+	clearScreen()
+	os.Stdout.WriteString(DisplayBoard(board) + "\n")
+}
+
 func switchPlayer(currentPlayer rune) rune {
 	if currentPlayer == 'X' {
 		return 'O'
@@ -249,16 +254,14 @@ func main() {
 
 			board, _ = ApplyMove(board, row, col, currentPlayer)
 			if CheckWin(board, currentPlayer) {
-				clearScreen()
-				os.Stdout.WriteString(DisplayBoard(board) + "\n")
+				refreshBoard(board)
 				log.Printf("Player %c wins!\n", currentPlayer)
 
 				break
 			}
 
 			if CheckDraw(board) {
-				clearScreen()
-				os.Stdout.WriteString(DisplayBoard(board) + "\n")
+				refreshBoard(board)
 				log.Println("It's a draw!")
 
 				break
