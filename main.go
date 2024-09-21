@@ -52,7 +52,6 @@ func IsValidMove(board [3][3]rune, currentRow int, currentCol int) bool {
 
 func ApplyMove(board [3][3]rune, currentRow int, currentCol int, player rune) ([3][3]rune, error) {
 	if player != 'X' && player != 'O' {
-		// return board, fmt.Errorf("invalid player: %c", player)
 		return board, errors.New("invalid player")
 	}
 
