@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"log"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -79,6 +81,36 @@ func TestSwitchPlayer(t *testing.T) {
 
 	if nextPlayer != 'X' {
 		t.Errorf("Expected next player to be 'X', but got %c", nextPlayer)
+	}
+}
+
+func TestPromptRestart(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Restart with lowercase y", "y\n", true},
+		{"Restart with uppercase Y", "Y\n", false},
+		{"Do not restart with n", "n\n", false},
+		{"Do not restart with invalid input", "invalid\n", false},
+		{"Do not restart with empty input", "\n", false},
+		{"Restart with extra spaces and y", " y \n", true},
+		{"Do not restart with extra spaces and n", " n \n", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			reader := strings.NewReader(tt.input)
+			log.Println("Current reader TYPE is: ", reflect.TypeOf(reader))
+			bufReader := bufio.NewReader(reader)
+
+			result := PromptRestart(bufReader)
+
+			if result != tt.expected {
+				t.Errorf("PromptRestart() = %v, expected %v", result, tt.expected)
+			}
+		})
 	}
 }
 
