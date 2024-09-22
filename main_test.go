@@ -129,6 +129,7 @@ func TestApplyMove(t *testing.T) {
 				if err == nil {
 					t.Errorf("ApplyMove() expected error but got none")
 				}
+
 				return
 			}
 
@@ -232,6 +233,7 @@ func TestCheckDraw(t *testing.T) {
 		{'X', 'O', 'O'},
 		{'O', 'X', 'X'},
 	}
+
 	if !CheckDraw(board) {
 		t.Errorf("Expected the game to be a draw")
 	}
