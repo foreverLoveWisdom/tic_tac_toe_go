@@ -23,8 +23,10 @@ func TestSetupNewGame(t *testing.T) {
 }
 
 func TestProcessPlayerMove(t *testing.T) {
+	var valid bool
+
 	board, _, _ := SetupNewGame()
-	board, _, valid := processPlayerMove(board, 'X', createReader("1 1\n"))
+	board, _, valid = processPlayerMove(board, 'X', createReader("1 1\n"))
 
 	if !valid {
 		t.Error("Expected move to be valid")
@@ -64,7 +66,6 @@ func TestEvaluateGameStatus(t *testing.T) {
 	}
 }
 
-// TestSwitchPlayer checks if players are switched correctly.
 func TestSwitchPlayer(t *testing.T) {
 	player := 'X'
 	nextPlayer := switchPlayer(player)
