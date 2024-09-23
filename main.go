@@ -196,14 +196,6 @@ func parseMove(input string) (int, int, error) {
 	row, _ := strconv.Atoi(parts[0])
 	col, _ := strconv.Atoi(parts[1])
 
-	// if err1 != nil {
-	// 	return -1, -1, errors.New("invalid row number!!! Row number must be an integer between 1 and 3")
-	// }
-
-	// if err2 != nil {
-	// 	return -1, -1, errors.New("invalid column number!! Column number must be an integer between 1 and 3")
-	// }
-
 	return row - 1, col - 1, nil
 }
 
