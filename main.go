@@ -116,23 +116,7 @@ func switchPlayer(currentPlayer rune) rune {
 	return 'X'
 }
 
-func checkWin(board [3][3]rune, player rune) bool {
-	return checkRows(board, player) || checkColumns(board, player) || checkDiagonals(board, player)
-}
-
 // --- Board Management (Board Display & Move Execution) ---.
-func checkDraw(board [3][3]rune) bool {
-	for row := range [3]struct{}{} {
-		for col := range [3]struct{}{} {
-			if board[row][col] == ' ' {
-				return false
-			}
-		}
-	}
-
-	return true
-}
-
 func printBoard(board [3][3]rune) {
 	os.Stdout.WriteString(renderBoard(board) + "\n")
 }
@@ -248,6 +232,22 @@ func parseMove(input string) (int, int, error) {
 }
 
 // ---Win/Draw Condition Checking---.
+func checkWin(board [3][3]rune, player rune) bool {
+	return checkRows(board, player) || checkColumns(board, player) || checkDiagonals(board, player)
+}
+
+func checkDraw(board [3][3]rune) bool {
+	for row := range [3]struct{}{} {
+		for col := range [3]struct{}{} {
+			if board[row][col] == ' ' {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
 func checkRows(board [3][3]rune, player rune) bool {
 	for row := range [3]struct{}{} {
 		if isRowWin(board, player, row) {
