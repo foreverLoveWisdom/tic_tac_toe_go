@@ -26,7 +26,7 @@ func main() {
 
 	for {
 		board, currentPlayer, reader := SetupNewGame()
-		ExecuteGameLoop(board, currentPlayer, reader)
+		RunGame(board, currentPlayer, reader)
 
 		if !PromptRestart(reader) {
 			log.Println("Thank you for playing! Goodbye.")
@@ -46,7 +46,7 @@ func SetupNewGame() ([3][3]rune, rune, *bufio.Reader) {
 	return board, player, reader
 }
 
-func ExecuteGameLoop(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]rune, rune) {
+func RunGame(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]rune, rune) {
 	var valid bool
 
 	for {
