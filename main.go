@@ -20,22 +20,6 @@ const (
 )
 
 // ---High-level Game Flow---.
-func main() {
-	// Remove timestamp from log messages.
-	log.SetFlags(0)
-
-	for {
-		board, currentPlayer, reader := SetupNewGame()
-		RunGame(board, currentPlayer, reader)
-
-		if !PromptRestart(reader) {
-			log.Println("Thank you for playing! Goodbye.")
-
-			break
-		}
-	}
-}
-
 func SetupNewGame() ([3][3]rune, rune, *bufio.Reader) {
 	board := initializeBoard()
 	player := 'X'
@@ -71,7 +55,7 @@ func RunGame(board [3][3]rune, currentPlayer rune, reader *bufio.Reader) ([3][3]
 	return board, currentPlayer
 }
 
-func PromptRestart(reader *bufio.Reader) bool {
+func PlayAgain(reader *bufio.Reader) bool {
 	log.Println("Game over! Would you like to play again? (y/n): ")
 
 	input, _ := reader.ReadString('\n')
@@ -101,7 +85,7 @@ func processPlayerMove(board [3][3]rune, currentPlayer rune, reader *bufio.Reade
 
 	board, err = executeMove(board, row, col, currentPlayer)
 	if err != nil {
-		log.Println("Invalid move. Try again.")
+		log.Println(err)
 		return board, currentPlayer, false
 	}
 
@@ -117,6 +101,18 @@ func switchPlayer(currentPlayer rune) rune {
 }
 
 // --- Board Management (Board Display & Move Execution) ---.
+func initializeBoard() [3][3]rune {
+	var board [3][3]rune
+
+	for row := range [3]struct{}{} {
+		for col := range [3]struct{}{} {
+			board[row][col] = ' '
+		}
+	}
+
+	return board
+}
+
 func printBoard(board [3][3]rune) {
 	os.Stdout.WriteString(renderBoard(board) + "\n")
 }
@@ -151,21 +147,13 @@ func renderBoard(board [3][3]rune) string {
 	return sb.String()
 }
 
-func executeMove(board [3][3]rune, row, col int, currentPlayer rune) ([3][3]rune, error) {
-	if !isValidMove(board, row, col) {
-		return board, errors.New("invalid move")
-	}
-
-	return applyMove(board, row, col, currentPlayer)
-}
-
-func applyMove(board [3][3]rune, currentRow int, currentCol int, player rune) ([3][3]rune, error) {
+func executeMove(board [3][3]rune, currentRow int, currentCol int, player rune) ([3][3]rune, error) {
 	if player != 'X' && player != 'O' {
 		return board, errors.New("invalid player")
 	}
 
 	if !isValidMove(board, currentRow, currentCol) {
-		return board, errors.New("invalid move")
+		return board, errors.New("invalid move, row and column must be between 1 and 3")
 	}
 
 	newBoard := board
@@ -180,18 +168,6 @@ func isValidMove(board [3][3]rune, currentRow int, currentCol int) bool {
 	}
 
 	return board[currentRow][currentCol] == ' '
-}
-
-func initializeBoard() [3][3]rune {
-	var board [3][3]rune
-
-	for row := range [3]struct{}{} {
-		for col := range [3]struct{}{} {
-			board[row][col] = ' '
-		}
-	}
-
-	return board
 }
 
 // ---Input handling---.
@@ -217,16 +193,16 @@ func parseMove(input string) (int, int, error) {
 		return -1, -1, errors.New("invalid input format")
 	}
 
-	row, err1 := strconv.Atoi(parts[0])
-	col, err2 := strconv.Atoi(parts[1])
+	row, _ := strconv.Atoi(parts[0])
+	col, _ := strconv.Atoi(parts[1])
 
-	if err1 != nil {
-		return -1, -1, errors.New("invalid row number")
-	}
+	// if err1 != nil {
+	// 	return -1, -1, errors.New("invalid row number!!! Row number must be an integer between 1 and 3")
+	// }
 
-	if err2 != nil {
-		return -1, -1, errors.New("invalid column number")
-	}
+	// if err2 != nil {
+	// 	return -1, -1, errors.New("invalid column number!! Column number must be an integer between 1 and 3")
+	// }
 
 	return row - 1, col - 1, nil
 }
@@ -306,4 +282,20 @@ func printWelcomeMessage() {
 	log.Println("Enter your move as 'row column' (e.g., '1 1' for top-left corner).")
 	log.Println("Note: There is a white space between the row and column.")
 	log.Println("Rows and columns are numbered from 1 to 3.")
+}
+
+func main() {
+	// Remove timestamp from log messages.
+	log.SetFlags(0)
+
+	for {
+		board, currentPlayer, reader := SetupNewGame()
+		RunGame(board, currentPlayer, reader)
+
+		if !PlayAgain(reader) {
+			log.Println("Thank you for playing! Goodbye.")
+
+			break
+		}
+	}
 }
