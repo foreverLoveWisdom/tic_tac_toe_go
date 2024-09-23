@@ -82,7 +82,7 @@ func TestSwitchPlayer(t *testing.T) {
 	}
 }
 
-func TestPromptRestart(t *testing.T) {
+func TestQuitGame(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -102,10 +102,10 @@ func TestPromptRestart(t *testing.T) {
 			reader := strings.NewReader(tt.input)
 			bufReader := bufio.NewReader(reader)
 
-			result := PromptRestart(bufReader)
+			result := PlayAgain(bufReader)
 
 			if result != tt.expected {
-				t.Errorf("PromptRestart() = %v, expected %v", result, tt.expected)
+				t.Errorf("PlayAgain() = %v, expected %v", result, tt.expected)
 			}
 		})
 	}
