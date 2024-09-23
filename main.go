@@ -21,6 +21,9 @@ const (
 
 // ---High-level Game Flow---.
 func main() {
+	// Remove timestamp from log messages.
+	log.SetFlags(0)
+
 	for {
 		board, currentPlayer, reader := SetupNewGame()
 		ExecuteGameLoop(board, currentPlayer, reader)
@@ -301,5 +304,6 @@ func printWelcomeMessage() {
 	log.Println("Welcome to Tic-Tac-Toe!")
 	log.Println("Players take turns to place their mark (X or O) on the board.")
 	log.Println("Enter your move as 'row column' (e.g., '1 1' for top-left corner).")
+	log.Println("Note: There is a white space between the row and column.")
 	log.Println("Rows and columns are numbered from 1 to 3.")
 }
