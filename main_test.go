@@ -2,8 +2,6 @@ package main
 
 import (
 	"bufio"
-	"log"
-	"reflect"
 	"strings"
 	"testing"
 )
@@ -102,7 +100,6 @@ func TestPromptRestart(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			reader := strings.NewReader(tt.input)
-			log.Println("Current reader TYPE is: ", reflect.TypeOf(reader))
 			bufReader := bufio.NewReader(reader)
 
 			result := PromptRestart(bufReader)
